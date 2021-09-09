@@ -19,7 +19,7 @@ class TeamData:
 		_FD  : first downs
 
 		"""
-		
+
 		# offense
 		self.o_P = o_P
 		self.o_F = o_F
@@ -65,8 +65,8 @@ from NFL_TeamsDict import NFL_TeamsDict
 AllTeamsData = []
 
 # offense
-url = "https://www.pro-football-reference.com/years/" + str(datetime.date.today().year) + "/"
-page = urllib.urlopen(url).read()
+url = "https://www.pro-football-reference.com/years/" + str(datetime.date.today().year-1) + "/"
+page = urllib.request.urlopen(url).read().decode('utf-8')
 offense_start = page.find('all_team_stats')
 page_cut = page[offense_start:]
 tableData = page_cut[page_cut.find("<tbody>") : page_cut.find("</tbody>")]
@@ -77,6 +77,7 @@ AllStats = re.findall(">(.*?)<", str(rows), flags=0)
 
 
 StatCounter = 0
+TeamCounter = 0
 index = 0
 # go thru the entire stats, and reset for each new team
 for stat in AllStats:
@@ -108,8 +109,8 @@ for stat in AllStats:
 	index += 1
 
 # defense
-url = "https://www.pro-football-reference.com/years/" + str(datetime.date.today().year) + "/opp.htm"
-page = urllib.urlopen(url).read()
+url = "https://www.pro-football-reference.com/years/" + str(datetime.date.today().year-1) + "/opp.htm"
+page = urllib.request.urlopen(url).read().decode('utf-8')
 tableData = page[page.find("<h2>Team Defense</h2>") : page.find("</tbody>")]
 soup = BeautifulSoup(tableData, 'lxml')
 rows = soup.findAll("tr")
@@ -117,12 +118,13 @@ AllStats = re.findall(">(.*?)<", str(rows), flags=0)
 # AllStats =  [...'New England Patriots', '', '', '1', '', '3', '', '308', '', '61', '', '5.0', '', '1', '', '0', '', '15', '', '27', '', '47', '', '276', '', '0', '', '1', '', '5.8', '', '11', '', '13', '', '32', '', '0', '', '2.5', '', '1', '', '6', '', '54', '', '3', '', '', '', '', '', '', '', ', ', '', ]
 
 StatCounter = 0
+TeamCounter = 0
+index = 0
 # go thru the entire stats, and reset for each new team
 for stat in AllStats:
 	# first, find which object index it is (for that team)
 	if stat in NFL_TeamsDict:
 		index = 0
-		TeamCounter = 0
 		for teamData in AllTeamsData:
 			if teamData.team == stat:
 				break
@@ -149,5 +151,12 @@ for stat in AllStats:
 	index += 1
 
 
+#for teamData in AllTeamsData:
+#	print (vars(teamData))
+
+f = open ('NFL.stat', 'w')
 for teamData in AllTeamsData:
-	print (vars(teamData))
+        f.write( str(vars(teamData))  )
+
+f.close()
+

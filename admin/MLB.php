@@ -1,9 +1,9 @@
 
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+	ini_set('display_errors', 1);
+	ini_set('display_startup_errors', 1);
+	error_reporting(E_ALL);
 
 
 	include("../DbConn.php");
@@ -201,289 +201,216 @@ error_reporting(E_ALL);
 		return $runs;
 	}
 
-	function Get_MLB_Picks($conn)
+	function getData($url) 
 	{
-		$GameDate = date("Y-m-d");
-		if (isset($_POST['submitMLBpicks']))
-			$GameDate = $_POST["PickDate"];
+		$html = file_get_contents($url);
+		$start = strpos($html, '<tbody>');
+		$end = strpos($html, '</tbody');
+		$all = substr($html, $start, $end - $start);
+		preg_match_all("/<tr>(.*)<\\/tr>/", $all, $match);
+		$DOM = new DOMDocument();
+		$DOM->loadHTML($all);
+		$rows = $DOM->getElementsByTagName('tr');
+		$cells = array();
+		foreach ($rows as $node)
+			$cells[] = tdRows($node->childNodes);
+		return $cells;
+	}
 
-		// get stats of all teams
-		//$fullData = shell_exec("python3 py/MLB.py");
-		$fullData = file_get_contents('http://tzefi.com/admin/py/MLB.stat');
-		$fullData = str_replace("{", "", $fullData);
-		$teams = [];
-		$stats = explode("}", $fullData);
+        function tdRows($elements)
+        {
+		$cells = array();
+		foreach ($elements as $element) 
+			$cells[] = $element->nodeValue;
+		return $cells;
+        }
 
-		foreach ($stats as $stat)
+function getTeamCode($team)
+{
+	$code = "";
+	switch ($team)
+	{
+		case 'Arizona Diamondbacks': $code = 'ARI'; break;
+		case 'Atlanta Braves': $code = 'ATL'; break;
+		case 'Baltimore Orioles': $code = 'BAL'; break;
+		case 'Boston Red Sox': $code = 'BOS'; break;
+		case 'Chicago Cubs': $code = 'CHC'; break;
+		case 'Chicago White Sox': $code = 'CHW'; break;
+		case 'Cincinnati Reds': $code = 'CIN'; break;
+		case 'Cleveland Indians': $code = 'CLE'; break;
+		case 'Colorado Rockies': $code = 'COL'; break;
+		case 'Detroit Tigers': $code = 'DET'; break;
+		case 'Houston Astros': $code = 'HOU'; break;
+		case 'Kansas City Royals': $code = 'KCR'; break;
+		case 'Los Angeles Angels': $code = 'LAA'; break;
+		case 'Los Angeles Dodgers': $code = 'LAD'; break;
+		case 'Miami Marlins': $code = 'MIA'; break;
+		case 'Milwaukee Brewers': $code = 'MIL'; break;
+		case 'Minnesota Twins': $code = 'MIN'; break;
+		case 'New York Mets': $code = 'NYM'; break;
+		case 'New York Yankees': $code = 'NYY'; break;
+		case 'Oakland Athletics': $code = 'OAK'; break;
+		case 'Philadelphia Phillies': $code = 'PHI'; break;
+		case 'Pittsburgh Pirates': $code = 'PIT'; break;
+		case 'San Diego Padres': $code = 'SDP'; break;
+		case 'Seattle Mariners': $code = 'SEA'; break;
+		case 'San Francisco Giants': $code = 'SFG'; break;
+		case 'St. Louis Cardinals': $code = 'STL'; break;
+		case 'Tampa Bay Rays': $code = 'TBR'; break;
+		case 'Texas Rangers': $code = 'TEX'; break;
+		case 'Toronto Blue Jays': $code = 'TOR'; break;
+		case 'Washington Nationals': $code = 'WSN'; break;
+	}
+	return $code;
+}
+
+function Get_MLB_Picks($conn)
+{
+	$GameDate = date("Y-m-d");
+	if (isset($_POST['submitMLBpicks']))
+		$GameDate = $_POST["PickDate"];
+
+	// get stats of all teams
+	$batting = getData('https://www.baseball-reference.com/leagues/majors/' . date('Y') . '-standard-batting.shtml');
+	$pitching = getData('https://www.baseball-reference.com/leagues/majors/' . date('Y') . '-standard-pitching.shtml');
+	$teams = [];
+
+	for ($i=0; $i<count($batting); $i++)
+	{
+		$team = new MLB_TeamData("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+		$team->team = getTeamCode($batting[$i][0]);
+		$team->b_RSPG = $batting[$i][3];
+		$team->b_PA = $batting[$i][5];
+		$team->b_AB = $batting[$i][6];
+		$team->b_R = $batting[$i][7];
+		$team->b_H = $batting[$i][8];
+		$team->b_DBL = $batting[$i][9];
+		$team->b_TRPL = $batting[$i][10];
+		$team->b_HR = $batting[$i][11];
+		$team->b_RBI = $batting[$i][12];
+		$team->b_SB = $batting[$i][13];
+		$team->b_CS = $batting[$i][14];
+		$team->b_BB = $batting[$i][15];
+		$team->b_SO = $batting[$i][16];
+		$team->b_BA = $batting[$i][17];
+		$team->b_OBP = $batting[$i][18];
+		$team->b_SLG = $batting[$i][19];
+		$team->b_OPS = $batting[$i][20];
+		$team->b_OPSP = $batting[$i][21];
+		$team->b_TB = $batting[$i][22];
+		$team->b_GDP = $batting[$i][23];
+		$team->b_HBP = $batting[$i][24];
+		$team->b_SH = $batting[$i][25];
+		$team->b_SF = $batting[$i][26];
+		$team->b_IBB = $batting[$i][27];
+		$team->b_LOB = $batting[$i][28];
+
+		// pitching
+		$team->p_RGPG = $pitching[$i][3];
+		$team->p_W = $pitching[$i][4];
+		$team->p_L = $pitching[$i][5];
+		$team->p_WLP = $pitching[$i][6];
+		$team->p_ERA = $pitching[$i][7];
+		$team->p_G = $pitching[$i][8];
+		$team->p_GS = $pitching[$i][9];
+		$team->p_GF = $pitching[$i][10];
+		$team->p_CG = $pitching[$i][11];
+		$team->p_tSho = $pitching[$i][12];
+		$team->p_cSho = $pitching[$i][13];
+		$team->p_SV = $pitching[$i][14];
+		$team->p_IP = $pitching[$i][15];
+		$team->p_H = $pitching[$i][16];
+		$team->p_R = $pitching[$i][17];
+		$team->p_ER = $pitching[$i][18];
+		$team->p_HR = $pitching[$i][19];
+		$team->p_BB = $pitching[$i][20];
+		$team->p_IBB = $pitching[$i][21];
+		$team->p_SO = $pitching[$i][22];
+		$team->p_HBP = $pitching[$i][23];
+		$team->p_BK = $pitching[$i][24];
+		$team->p_WP = $pitching[$i][25];
+		$team->p_BF = $pitching[$i][26];
+		$team->p_ERAP = $pitching[$i][27];
+		$team->p_FIP = $pitching[$i][28];
+		$team->p_WHIP = $pitching[$i][29];
+		$team->p_H9 = $pitching[$i][30];
+		$team->p_HR9 = $pitching[$i][31];
+		$team->p_BB9 = $pitching[$i][32];
+		$team->p_SO9 = $pitching[$i][33];
+		$team->p_SOW = $pitching[$i][34];
+		$team->p_LOB = $pitching[$i][35];
+
+		array_push ($teams, $team);
+	}
+
+	// get the date's scheduled GAMES
+	$sql = "select id, GameDate, AwayTeam, HomeTeam from games where GameDate = '" . $GameDate . "' and league = 'MLB'; ";
+	$results = $conn->query($sql) or die($conn->error);
+	$update_multi_sql = "";
+	while ($row = $results->fetch_assoc())
+	{
+		$awayTeam = "";
+		$awayScore = "";
+		$homeTeam = 0;
+		$homeScore = 0;
+		$awayTeamFound = 0;
+		$homeTeamFound = 0;
+		foreach ($teams as $team)
 		{
-			$statsExplode = explode(", ", $stat);
-			if (sizeof($statsExplode) == 58)
+			if (trim($team->team) == trim($row["AwayTeam"]))
 			{
-				$team = new MLB_TeamData("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
-				foreach ($statsExplode as $statsEach)
-				{
-					$statsEachSplit = explode(":", $statsEach);
-					$key = str_replace("'", "", $statsEachSplit[0]);
-					$val = str_replace("'", "", $statsEachSplit[1]);
-					switch ($key)
-					{
-						case "team":
-							$team->team = $val;
-							break;
-
-						// batting
-						case "b_RSPG":
-							$team->b_RSPG = $val;
-							break;
-						case "b_PA":
-							$team->b_PA = $val;
-							break;
-						case "b_AB":
-							$team->b_AB = $val;
-							break;
-						case "b_R":
-							$team->b_R = $val;
-							break;
-						case "b_H":
-							$team->b_H = $val;
-							break;
-						case "b_DBL":
-							$team->b_DBL = $val;
-							break;
-						case "b_TRPL":
-							$team->b_TRPL = $val;
-							break;
-						case "b_HR":
-							$team->b_HR = $val;
-							break;
-						case "b_RBI":
-							$team->b_RBI = $val;
-							break;
-						case "b_SB":
-							$team->b_SB = $val;
-							break;
-						case "b_CS":
-							$team->b_CS = $val;
-							break;
-						case "b_BB":
-							$team->b_BB = $val;
-							break;
-						case "b_SO":
-							$team->b_SO = $val;
-							break;
-						case "b_BA":
-							$team->b_BA = $val;
-							break;
-						case "b_OBP":
-							$team->b_OBP = $val;
-							break;
-						case "b_SLG":
-							$team->b_SLG = $val;
-							break;
-						case "b_OPS":
-							$team->b_OPS = $val;
-							break;
-						case "b_OPSP":
-							$team->b_OPSP = $val;
-							break;
-						case "b_TB":
-							$team->b_TB = $val;
-							break;
-						case "b_GDP":
-							$team->b_GDP = $val;
-							break;
-						case "b_HBP":
-							$team->b_HBP = $val;
-							break;
-						case "b_SH":
-							$team->b_SH = $val;
-							break;
-						case "b_SF":
-							$team->b_SF = $val;
-							break;
-						case "b_IBB":
-							$team->b_IBB = $val;
-							break;
-						case "b_LOB":
-							$team->b_LOB = $val;
-							break;
-
-						// pitching
-						case "p_RGPG":
-							$team->p_RGPG = $val;
-							break;
-						case "p_W":
-							$team->p_W = $val;
-							break;
-						case "p_L":
-							$team->p_L = $val;
-							break;
-						case "p_WLP":
-							$team->p_WLP = $val;
-							break;
-						case "p_ERA":
-							$team->p_ERA = $val;
-							break;
-						case "p_G":
-							$team->p_G = $val;
-							break;
-						case "p_GS":
-							$team->p_GS = $val;
-							break;
-						case "p_GF":
-							$team->p_GF = $val;
-							break;
-						case "p_CG":
-							$team->p_CG = $val;
-							break;
-						case "p_tSho":
-							$team->p_tSho = $val;
-							break;
-						case "p_cSho":
-							$team->p_cSho = $val;
-							break;
-						case "p_SV":
-							$team->p_SV = $val;
-							break;
-						case "p_IP":
-							$team->p_IP = $val;
-							break;
-						case "p_H":
-							$team->p_H = $val;
-							break;
-						case "p_R":
-							$team->p_R = $val;
-							break;
-						case "p_ER":
-							$team->p_ER = $val;
-							break;
-						case "p_HR":
-							$team->p_HR = $val;
-							break;
-						case "p_BB":
-							$team->p_BB = $val;
-							break;
-						case "p_IBB":
-							$team->p_IBB = $val;
-							break;
-						case "p_SO":
-							$team->p_SO = $val;
-							break;
-						case "p_HBP":
-							$team->p_HBP = $val;
-							break;
-						case "p_BK":
-							$team->p_BK = $val;
-							break;
-						case "p_WP":
-							$team->p_WP = $val;
-							break;
-						case "p_BF":
-							$team->p_BF = $val;
-							break;
-						case "p_ERAP":
-							$team->p_ERAP = $val;
-							break;
-						case "p_FIP":
-							$team->p_FIP = $val;
-							break;
-						case "p_WHIP":
-							$team->p_WHIP = $val;
-							break;
-						case "p_H9":
-							$team->p_H9 = $val;
-							break;
-						case "p_HR9":
-							$team->p_HR9 = $val;
-							break;
-						case "p_BB9":
-							$team->p_BB9 = $val;
-							break;
-						case "p_SO9":
-							$team->p_SO9 = $val;
-							break;
-						case "p_SOW":
-							$team->p_SOW = $val;
-							break;
-						case "p_LOB":
-							$team->p_LOB = $val;
-							break;
-					}
-				}
-				array_push ($teams, $team);
-			}
-		}
-
-		// get the date's scheduled GAMES
-		$sql = "select id, GameDate, AwayTeam, HomeTeam from games where GameDate = '" . $GameDate . "' and league = 'MLB'; ";
-		$results = $conn->query($sql) or die($conn->error);
-		$update_multi_sql = "";
-		while ($row = $results->fetch_assoc())
-		{
-			$awayTeam = "";
-			$awayScore = "";
-			$homeTeam = 0;
-			$homeScore = 0;
-			$awayTeamFound = 0;
-			$homeTeamFound = 0;
-			foreach ($teams as $team)
-			{
-				if (trim($team->team) == trim($row["AwayTeam"]))
-				{
 					$awayTeam = $team;
 					$awayGrade = Get_MLB_Grade($team);
 					$awayScore = Get_MLB_Score($team);
 					$awayTeamFound = 1;
-				}
-				if (trim($team->team) == trim($row["HomeTeam"]))
-				{
+			}
+			if (trim($team->team) == trim($row["HomeTeam"]))
+			{
 					$homeTeam = $team;
 					$homeGrade = Get_MLB_Grade($team);
 					$homeScore = Get_MLB_Score($team);
 					$homeTeamFound = 1;
-				}
-				if ($awayTeamFound == 1 && $homeTeamFound == 1)
-				{
+			}
+			if ($awayTeamFound == 1 && $homeTeamFound == 1)
+			{
 					// away team won (higher grade), but they have less runs in rand()
 					if ($awayGrade > $homeGrade && $awayScore < $homeScore)
 					{
-						// final score should be the actual RSPG
-						$awayScore = ceil($awayTeam->b_RSPG);
-						$homeScore = floor($homeTeam->b_RSPG);
+							// final score should be the actual RSPG
+							$awayScore = ceil($awayTeam->b_RSPG);
+							$homeScore = floor($homeTeam->b_RSPG);
 					}
 					if ($awayGrade < $homeGrade && $awayScore > $homeScore)
 					{
-						$awayScore = floor($awayTeam->b_RSPG);
-						$homeScore = ceil($homeTeam->b_RSPG);
+							$awayScore = floor($awayTeam->b_RSPG);
+							$homeScore = ceil($homeTeam->b_RSPG);
 					}
 
 					// tie breaker
 					if ($awayScore == $homeScore)
 					{
-						// how many extra runs
-						$extraRuns = rand(1, 2);
-						// who won?
-						if (rand(0, 1) == 1)
-							$awayScore += $extraRuns;
-						else
-							$homeScore += $extraRuns;
+							// how many extra runs
+							$extraRuns = rand(1, 2);
+							// who won?
+							if (rand(0, 1) == 1)
+									$awayScore += $extraRuns;
+							else
+									$homeScore += $extraRuns;
 					}
-					$sql = " update games set AwayScore = " . $awayScore . ", HomeScore = " . $homeScore;
-					$sql.= " where id = " . $row["id"] ;
-					$sql.= " and AwayScore is null and HomeScore is null ;  ";
-					$update_multi_sql .= $sql;
-
-echo $sql . "<br>";
-					break;
-				}
 			}
 		}
-		$conn->multi_query($update_multi_sql);
-		if (isset($_POST['submitMLBpicks']))
-		{
+		$sql = " update games set AwayScore = " . $awayScore . ", HomeScore = " . $homeScore;
+		$sql.= " where id = " . $row["id"] ;
+		$sql.= " and AwayScore is null and HomeScore is null ;  ";
+echo $sql. "<br>";
+		$update_multi_sql .= $sql;
+	}
+	$conn->multi_query($update_multi_sql);
+	if (isset($_POST['submitMLBpicks']))
+	{
 			echo "These have been updated:</br>";
 			echo str_replace(';', ';</br>', $update_multi_sql);
-		}
-		$conn->close();
 	}
+	$conn->close();
+}
 ?>

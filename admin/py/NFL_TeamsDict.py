@@ -23,12 +23,12 @@ NFL_TeamsDict =	{
 	"New Orleans Saints" : "NOR",
 	"New York Giants" : "NYG",
 	"New York Jets" : "NYJ",
-	"Oakland Raiders" : "OAK",
+	"Las Vegas Raiders" : "LVG",
 	"Philadelphia Eagles" : "PHI",
 	"Pittsburgh Steelers" : "PIT",
 	"San Francisco 49ers" : "SFO",
 	"Seattle Seahawks" : "SEA",
 	"Tampa Bay Buccaneers" : "TAM",
 	"Tennessee Titans" : "TEN",
-	"Washington Redskins" : "WAS"
+	"Washington Football Team" : "WAS"
 }
