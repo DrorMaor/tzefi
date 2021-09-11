@@ -4,7 +4,8 @@
 	error_reporting(E_ALL);
 
 
-	$fullData = getData('https://www.baseball-reference.com/leagues/majors/2021-standard-pitching.shtml');
+	//$fullData = getData('https://www.baseball-reference.com/leagues/majors/2021-standard-pitching.shtml');
+	$fullData = getData('https://www.pro-football-reference.com/years/2020/opp.htm');
 	//print_r($fullData);
 	foreach ($fullData as $arr) {
 		print_r($arr);
@@ -13,9 +14,9 @@
 
 	function getData($url) {
 		$html = file_get_contents($url);
-		$start = strpos($html, '<tbody>');
-		$end = strpos($html, '</tbody');
-		$all = substr($html, $start, $end - $start);
+		$start = strpos($html, 'Team Defense');
+		$end = strpos($html, 'Team Advanced Defense', $start);
+		$all = substr($html, $start, $end);
 		preg_match_all("/<tr>(.*)<\\/tr>/", $all, $match);
 		$DOM = new DOMDocument();
 		$DOM->loadHTML($all);

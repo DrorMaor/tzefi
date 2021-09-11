@@ -1,137 +1,191 @@
-<div>
-	<form action="" method="post" name="frmPick">
-		Week:
-		<select name="week">
-			<?php
-				for ($i=1; $i<=17; $i++)
-					echo "<option value='$i'>$i</option>";
-			?>
-		</select>
-		&nbsp;
-		<input type="submit" value="Generate NFL Picks" name="submitNFLpicks">
-	</form>
-
 <?php
-	class NFL_TeamData {
+
+	 ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+
+	class NFL_TeamData
+	{
 		public $team;
+		public $G;	// games played
 
 		// offense stats
-		public $o_P;
-		public $o_F;
-		public $o_p_C;
-		public $o_p_A;
-		public $o_p_Y;
-		public $o_p_TD;
-		public $o_p_I;
-		public $o_p_FD;
-		public $o_r_A;
-		public $o_r_Y;
-		public $o_r_TD;
-		public $o_r_FD;
-		public $o_n_N;
-		public $o_n_Y;
-		public $o_n_FD;
+		public $o_P;	// points (3)
+		public $o_Y;	// total yards (4)
+		public $o_TO;	// turnovers (7)
+		public $o_FD;	// first downs (9)
+		public $o_CMP;	// complete passes (10)
+		public $o_PTD;	// passing TDs (13)
+		public $o_RTD;	// rushing TDs (19)
+		public $o_PY;	// penalty yards (23)
 
 		// defense stats
-		public $d_P;
-		public $d_F;
-		public $d_p_C;
-		public $d_p_A;
-		public $d_p_Y;
-		public $d_p_TD;
-		public $d_p_I;
-		public $d_p_FD;
-		public $d_r_A;
-		public $d_r_Y;
-		public $d_r_TD;
-		public $d_r_FD;
-		public $d_n_N;
-		public $d_n_Y;
-		public $d_n_FD;
+		public $d_P;	// points (3)
+		public $d_Y;	// total yards (4)
+		public $d_TO;	// turnovers (7)
+		public $d_FD;	// first downs (9)
+		public $d_CMP;	// complete passes (10)
+		public $d_PTD;	// passing TDs (13)
+		public $d_RTD;	// rushing TDs (19)
+		public $d_PY;	// penalty yards (23)
 
-		function __construct ($team, $o_P, $o_F, $o_p_C, $o_p_A, $o_p_Y, $o_p_TD, $o_p_I, $o_p_FD, $o_r_A, $o_r_Y, $o_r_TD, $o_r_FD, $o_n_N, $o_n_Y, $o_n_FD, $d_P, $d_F, $d_p_C, $d_p_A, $d_p_Y, $d_p_TD, $d_p_I, $d_p_FD, $d_r_A, $d_r_Y, $d_r_TD, $d_r_FD, $d_n_N, $d_n_Y, $d_n_FD)
+		function __construct ($team, $G, $o_P, $o_Y, $o_TO, $o_FD, $o_CMP, $o_PTD, $o_RTD, $o_PY, $d_P, $d_Y, $d_TO, $d_FD, $d_CMP, $d_PTD, $d_RTD, $d_PY)
 		{
 			$this->team = $team;
+			$this->G = $G;
+
 			// offense stats
 			$this->o_P = $o_P;
-			$this->o_F = $o_F;
-			$this->o_p_C = $o_p_C;
-			$this->o_p_A = $o_p_A;
-			$this->o_p_Y = $o_p_Y;
-			$this->o_p_TD = $o_p_TD;
-			$this->o_p_I = $o_p_I;
-			$this->o_p_FD = $o_p_FD;
-			$this->o_r_A = $o_r_A;
-			$this->o_r_Y = $o_r_Y;
-			$this->o_r_TD = $o_r_TD;
-			$this->o_r_FD = $o_r_FD;
-			$this->o_n_N = $o_n_N;
-			$this->o_n_Y = $o_n_Y;
-			$this->o_n_FD = $o_n_FD;
+			$this->o_Y = $o_Y;
+			$this->o_TO = $o_TO;
+			$this->o_FD = $o_FD;
+			$this->o_CMP = $o_CMP;
+			$this->o_PTD = $o_PTD;
+			$this->o_RTD = $o_RTD;
+			$this->o_PY = $o_PY;
 
 			// defense stats
 			$this->d_P = $d_P;
-			$this->d_F = $d_F;
-			$this->d_p_C = $d_p_C;
-			$this->d_p_A = $d_p_A;
-			$this->d_p_Y = $d_p_Y;
-			$this->d_p_TD = $d_p_TD;
-			$this->d_p_I = $d_p_I;
-			$this->d_p_FD = $d_p_FD;
-			$this->d_r_A = $d_r_A;
-			$this->d_r_Y = $d_r_Y;
-			$this->d_r_TD = $d_r_TD;
-			$this->d_r_FD = $d_r_FD;
-			$this->d_n_N = $d_n_N;
-			$this->d_n_Y = $d_n_Y;
-			$this->d_n_FD = $d_n_FD;
+			$this->d_Y = $d_Y;
+			$this->d_TO = $d_TO;
+			$this->d_FD = $d_FD;
+			$this->d_CMP = $d_CMP;
+			$this->d_PTD = $d_PTD;
+			$this->d_RTD = $d_RTD;
+			$this->d_PY = $d_PY;
 		}
+	}
+
+	function getData($url, $startText, $endText)
+	{
+		$html = file_get_contents($url);
+		$start = strpos($html, $startText);
+		$end = strpos($html, $endText);
+		$all = substr($html, $start, $end);
+		preg_match_all("/<tr>(.*)<\\/tr>/", $all, $match);
+		$DOM = new DOMDocument();
+		$DOM->loadHTML($all);
+		$rows = $DOM->getElementsByTagName('tr');
+		$cells = array();
+		foreach ($rows as $node)
+			$cells[] = tdRows($node->childNodes);
+		return $cells;
+	}
+
+	function tdRows($elements)
+	{
+		$cells = array();
+		foreach ($elements as $element)
+			$cells[] = $element->nodeValue;
+		return $cells;
+	}
+
+	function getTeamCode($team)
+	{
+		$code = "";
+		switch ($team)
+		{
+			case 'Los Angeles Rams': $code = 'LAR'; break;
+			case 'Baltimore Ravens': $code = 'BAL'; break;
+			case 'Pittsburgh Steelers': $code = 'PIT'; break;
+			case 'Washington Football Team': $code = 'WAS'; break;
+			case 'New Orleans Saints': $code = 'NOR'; break;
+			case 'Miami Dolphins': $code = 'MIA'; break;
+			case 'New England Patriots': $code = 'NWE'; break;
+			case 'Tampa Bay Buccaneers': $code = 'TAM'; break;
+			case 'New York Giants': $code = 'NYG'; break;
+			case 'Indianapolis Colts': $code = 'IND'; break;
+			case 'Kansas City Chiefs': $code = 'KAN'; break;
+			case 'Arizona Cardinals': $code = 'ARI'; break;
+			case 'Green Bay Packers': $code = 'GNB'; break;
+			case 'Chicago Bears': $code = 'CHI'; break;
+			case 'Seattle Seahawks': $code = 'SEA'; break;
+			case 'Buffalo Bills': $code = 'BUF'; break;
+			case 'San Francisco 49ers': $code = 'SFO'; break;
+			case 'Carolina Panthers': $code = 'CAR'; break;
+			case 'Atlanta Falcons': $code = 'ATL'; break;
+			case 'Philadelphia Eagles': $code = 'PHI'; break;
+			case 'Cleveland Browns': $code = 'CLE'; break;
+			case 'Cincinnati Bengals': $code = 'CIN'; break;
+			case 'Los Angeles Chargers': $code = 'LAC'; break;
+			case 'Tennessee Titans': $code = 'TEN'; break;
+			case 'Denver Broncos': $code = 'DEN'; break;
+			case 'New York Jets': $code = 'NYJ'; break;
+			case 'Houston Texans': $code = 'HOU'; break;
+			case 'Dallas Cowboys': $code = 'DAL'; break;
+			case 'Minnesota Vikings': $code = 'MIN'; break;
+			case 'Las Vegas Raiders': $code = 'LVG'; break;
+			case 'Jacksonville Jaguars': $code = 'JAX'; break;
+			case 'Detroit Lions': $code = 'DET'; break;
+		}
+		return $code;
+	}
+
+	function Get_NFL_Stats() 
+	{
+		$offense = getData("https://www.pro-football-reference.com/years/2020/", "Tot Yds &amp; TO", "League Total");
+		$defense = getData("https://www.pro-football-reference.com/years/2020/opp.htm", "Team Defense", "Team Advanced Defense");
+		$teams = [];
+
+		for ($i=0; $i<count($offense); $i++)
+        	{
+			$team = new NFL_TeamData("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+			$team->team = getTeamCode($offense[$i][1]);
+			$team->G = $offense[$i][2];
+
+			// offensive stats
+			$team->o_P = $offense[$i][3];
+			$team->o_Y = $offense[$i][4];
+			$team->o_TO = $offense[$i][7];
+			$team->o_FD = $offense[$i][9];
+			$team->o_CMP = $offense[$i][10];
+			$team->o_PTD = $offense[$i][13];
+			$team->o_RTD = $offense[$i][19];
+			$team->o_PY = $offense[$i][23];
+
+			// defense stats
+			$team->d_P = $defense[$i][3];
+			$team->d_Y = $defense[$i][4];
+			$team->d_TO = $defense[$i][7];
+			$team->d_FD = $defense[$i][9];
+			$team->d_CMP = $defense[$i][10];
+			$team->d_PTD = $defense[$i][13];
+			$team->d_RTD = $defense[$i][19];
+			$team->d_PY = $defense[$i][23];
+
+			array_push($teams, $team);
+		}
+		return $teams;
 	}
 
 	function Get_NFL_Grade($team)
 	{
 		// offense
-		$grade =  $team->o_P * 10;
-		$grade -= $team->o_F * 5;
-		if ($team->o_p_A > 0)
-			$grade += ($team->o_p_C / $team->o_p_A) * 1000;
-		$grade += $team->o_p_Y;
-		$grade += $team->o_p_TD * 10;
-		$grade -= $team->o_p_I * 5;
-		$grade += $team->o_p_FD * 3;
-		$grade += $team->o_r_Y;
-		$grade += $team->o_r_TD * 10;
-		$grade -= $team->o_n_N * 5;
-		$grade -= $team->o_n_Y;
-		$grade -= $team->o_n_FD * 3;
+		$grade = $team->o_P * 10;
+		$grade += $team->o_Y;
+		$grade -= ($team->o_TO * 5);
+		$grade += ($team->o_FD * 2.5);
+		$grade += ($team->o_CMP * 2);
+		$grade += ($team->o_PTD * 7);
+		$grade += ($team->o_RTD * 7);
+		$grade -= $team->o_PY;
 
 		// defense
 		$grade -= $team->d_P * 10;
-		$grade += $team->d_F * 5;
-		if ($team->d_p_A > 0)
-			$grade -= ($team->d_p_C / $team->d_p_A) * 1000;
-		$grade -= $team->d_p_Y;
-		$grade -= $team->d_p_TD * 10;
-		$grade += $team->d_p_I * 5;
-		$grade -= $team->d_p_FD * 3;
-		$grade -= $team->d_r_Y;
-		$grade -= $team->d_r_TD * 10;
-		$grade -= $team->d_n_N * 5;
-		$grade -= $team->d_n_Y;
-		$grade -= $team->d_n_FD * 3;
+		$grade -= $team->d_Y;
+		$grade += ($team->d_TO * 5);
+		$grade -= ($team->d_FD * 2.5);
+		$grade -= ($team->d_CMP * 2);
+		$grade -= ($team->d_PTD * 7);
+		$grade -= ($team->d_RTD * 7);
+		$grade += $team->d_PY;
 
 		return ceil($grade);
 	}
 
 	function Get_NFL_Score ($team, $grade)
 	{
-		$games = $_POST["week"] -1; // (-1 means # of games played, we're not considering Bye weeks)
-		if ($games == 0)  // in order not to divide by zero
-			$games = 1;
-		$TD = $team->o_p_TD + $team->o_r_TD;
-		$score = ($TD / $games) * 7;
-		$FG = (($team->o_P / $games) - $score) / 3;
-		$score += $FG * 3;
+		$score = $team->o_P / $team->G;
 		if ($grade >=0)
 			$score = (rand(85, 125) / 100) * $score;
 		else
@@ -154,185 +208,76 @@
 		return $score;
 	}
 
-	if (isset($_POST['submitNFLpicks']))
+	// get stats of all teams
+	$teams = Get_NFL_Stats();
+
+	// get this week's games
+	include ("../DbConn.php");
+	$sql = "
+		select g.id, AwayTeam.code AwayTeam, HomeTeam.code HomeTeam from games g 
+			inner join NFLweeks w 
+				on (g.GameDate >= w.StartDate and g.GameDate <= w.EndDate) 
+			inner join (select league, code from teams) AwayTeam 
+				on AwayTeam.code = g.AwayTeam
+			inner join (select league, code from teams) HomeTeam 
+				on HomeTeam.code = g.HomeTeam
+		where g.league = 'NFL' and AwayTeam.league = 'NFL' and HomeTeam.league = 'NFL'
+			and w.week = ".$_GET["week"].";  ";
+	$results = $conn->query($sql);
+
+	$update_multi_sql = "";
+	while ($row = $results->fetch_assoc())
 	{
-		// get stats of all teams
-		$fullData = shell_exec("python py/NFL.py");
-		$fullData = str_replace("{", "", $fullData);
-		$teams = [];
-		$stats = explode("}", $fullData);
-
-		foreach ($stats as $stat)
+		$awayScore = -1;
+		$homeScore = -1;
+		foreach ($teams as $team)
 		{
-			$statsExplode = explode(", ", $stat);
-			if (sizeof($statsExplode) == 31)
+			if (trim($team->team) == trim($row["AwayTeam"]))
 			{
-				$team = new NFL_TeamData("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
-				foreach ($statsExplode as $statsEach)
+				$awayGrade = Get_NFL_Grade($team);
+				$awayScore = Get_NFL_Score($team, $awayGrade);
+			}
+			if (trim($team->team) == trim($row["HomeTeam"]))
+			{
+				$homeGrade = Get_NFL_Grade($team);
+				$homeScore = Get_NFL_Score($team, $homeGrade);
+			}
+			if ($awayScore >=0 && $homeScore >=0)
+			{
+				// give an advantage to the stronger team
+				if ($awayGrade > $homeGrade)
 				{
-					$statsEachSplit = explode(":", $statsEach);
-					$key = str_replace("'", "", $statsEachSplit[0]);
-					$val = str_replace("'", "", $statsEachSplit[1]);
-					switch ($key)
-					{
-						case "team":
-							$team->team = $val;
-							break;
-
-						// offense
-						case "o_P":
-							$team->o_P = $val;
-							break;
-						case "o_F":
-							$team->o_F = $val;
-							break;
-						case "o_p_C":
-							$team->o_p_C = $val;
-							break;
-						case "o_p_A":
-							$team->o_p_A = $val;
-							break;
-						case "o_p_Y":
-							$team->o_p_Y = $val;
-							break;
-						case "o_p_TD":
-							$team->o_p_TD = $val;
-							break;
-						case "o_p_I":
-							$team->o_p_I = $val;
-							break;
-						case "o_p_FD":
-							$team->o_p_FD = $val;
-							break;
-						case "o_r_A":
-							$team->o_r_A = $val;
-							break;
-						case "o_r_Y":
-							$team->o_r_Y = $val;
-							break;
-						case "o_r_TD":
-							$team->o_r_TD = $val;
-							break;
-						case "o_r_FD":
-							$team->o_r_FD = $val;
-							break;
-						case "o_n_N":
-							$team->o_n_N = $val;
-							break;
-						case "o_n_Y":
-							$team->o_n_Y = $val;
-							break;
-						case "o_n_FD":
-							$team->o_n_FD = $val;
-							break;
-
-						// defense
-						case "d_P":
-							$team->d_P = $val;
-							break;
-						case "d_F":
-							$team->d_F = $val;
-							break;
-						case "d_p_C":
-							$team->d_p_C = $val;
-							break;
-						case "d_p_A":
-							$team->d_p_A = $val;
-							break;
-						case "d_p_Y":
-							$team->d_p_Y = $val;
-							break;
-						case "d_p_TD":
-							$team->d_p_TD = $val;
-							break;
-						case "d_p_I":
-							$team->d_p_I = $val;
-							break;
-						case "d_p_FD":
-							$team->d_p_FD = $val;
-							break;
-						case "d_r_A":
-							$team->d_r_A = $val;
-							break;
-						case "d_r_Y":
-							$team->d_r_Y = $val;
-							break;
-						case "d_r_TD":
-							$team->d_r_TD = $val;
-							break;
-						case "d_r_FD":
-							$team->d_r_FD = $val;
-							break;
-						case "d_n_N":
-							$team->d_n_N = $val;
-							break;
-						case "d_n_Y":
-							$team->d_n_Y = $val;
-							break;
-						case "d_n_FD":
-							$team->d_n_FD = $val;
-							break;
-					}
+					$awayScore += rand(0,7);
+					$homeScore -= rand(0,7);
 				}
-				array_push ($teams, $team);
+				else
+				{
+					$homeScore += rand(0,7);
+					$awayScore -= rand(0,7);
+				}
+				if ($awayScore < 0)
+					$awayScore = 3;
+				if ($homeScore < 0)
+					$homeScore = 3;
+				// don't have tie games (very rare)
+				if ($awayScore == $homeScore)
+				{
+					if ($awayGrade > $homeGrade)
+						$awayScore += rand(1,3);
+					else
+						$homeScore += rand(1,3);
+				}
+				$sql = " update games set AwayScore = " . $awayScore . ", HomeScore = " . $homeScore;
+				$sql.= " where id = ".$row['id'];
+				$sql.= " and AwayScore is null and HomeScore is null ;  ";
+				$update_multi_sql .= $sql;
+				break;
 			}
 		}
-
-		// get this week's games
-		include ("../DbConn.php");
-		$sql = "
-			select g.id, AwayTeam.AwayTeam, HomeTeam.HomeTeam from games g 
-				inner join NFLweeks w 
-					on (g.GameDate >= w.StartDate and g.GameDate <= w.EndDate) 
-				inner join (select league, code, concat(city, ' ', name) AwayTeam from teams) AwayTeam 
-					on AwayTeam.code = g.AwayTeam
-				inner join (select league, code, concat(city, ' ', name) HomeTeam from teams) HomeTeam 
-					on HomeTeam.code = g.HomeTeam
-			where g.league = 'NFL' and AwayTeam.league = 'NFL' and HomeTeam.league = 'NFL'
-				and w.week = ".$_POST["week"].";  ";
-		$results = $conn->query($sql);
-		$update_multi_sql = "";
-		while ($row = $results->fetch_assoc())
-		{
-			$awayTeam = "";
-			$awayScore = "";
-			$homeTeam = 0;
-			$homeScore = 0;
-			$awayTeamFound = 0;
-			$homeTeamFound = 0;
-			foreach ($teams as $team)
-			{
-				if (trim($team->team) == trim($row["AwayTeam"]))
-				{
-					$awayTeam = $team;
-					$awayGrade = Get_NFL_Grade($team);
-					$awayScore = Get_NFL_Score($team, $awayGrade);
-					$awayTeamFound = 1;
-				}
-				if (trim($team->team) == trim($row["HomeTeam"]))
-				{
-					$homeTeam = $team;
-					$homeGrade = Get_NFL_Grade($team);
-					$homeScore = Get_NFL_Score($team, $homeGrade);
-					$homeTeamFound = 1;
-				}
-				if ($awayTeamFound == 1 && $homeTeamFound == 1)
-				{
-					$sql = " update games set AwayScorePick = ".$awayScore.", HomeScorePick = ".$homeScore;
-					$sql.= " where id = ".$row['id'];
-					$sql.= " and AwayScorePick is null and HomeScorePick is null ;  ";
-					$update_multi_sql .= $sql;
-					break;
-				}
-			}
-		}
-		$conn->multi_query($update_multi_sql);
-		echo "These NFL games have been updated:</br>";
-		echo str_replace(';', ';</br>', $update_multi_sql);
-		$conn->close();
 	}
+	$conn->multi_query($update_multi_sql);
+	echo "These NFL games have been updated:</br>";
+	echo str_replace(';', ';</br>', $update_multi_sql);
+	$conn->close();
 ?>
 
-</div>
-
-<hr>
