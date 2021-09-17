@@ -1,0 +1,140 @@
+#tdRecord {
+	font-weight:bold;
+	line-height:1.5;
+	font-size:22px;
+	font-family:arial;
+	padding:15px;
+	margin:15px;
+	vertical-align:top;
+	color: #0F1C46;
+}
+.tabs {
+	display:inline;	
+	margin:2px;
+	overflow: hidden;
+	float: left;
+	padding:2px;
+}
+.tabs:hover {
+	opacity:.5;
+	cursor: pointer;
+}
+.activeTab {
+	background-color:#0F1C46;
+	color:white !important;
+	border:1px solid #0F1C46;
+	border-radius:3px;
+}
+.flag {
+	height:15px;
+	padding:3px;
+}
+.indexLogo {
+	height: 23px;
+	padding-bottom: 10px;
+}
+.image {
+	cursor:pointer;
+	height:20px;
+}
+.activeTab1 {
+	border: 1px solid #0F1C46;
+	border-width: 1px 1px 0 1px;
+	border-bottom: 2px white solid;
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+.tabContent {
+	padding: 5px;
+	display:inline;
+}
+.heading {
+	font-size:24px;
+	font-family: arial;
+	font-weight: bold;
+	margin: 15px;
+	color: #0F1C46;
+	vertical-align: middle;
+}
+.game {
+	border:1px #b9bbc9 solid;
+	border-radius: 3px;
+	padding: 3px;
+	margin: 5px;
+	color: #0F1C46;
+}
+.logo {
+	height: 25px;
+	margin: 5px;
+}
+.team {
+	font-family: arial;
+	margin: 5px;
+	color: #0F1C46;
+}
+.winner {
+	font-weight: bold;
+}
+.score {
+	text-align: right;
+	color: #0F1C46;
+}
+.button {
+	color: #0F1C46;
+	font-size: 18px;
+	font-weight: bold;
+	border:1px #0F1C46 solid;
+	border-radius: 3px;
+	margin: 5px;
+	padding: 5px;
+	width: 100px;
+	text-align: center;
+	font-family: arial;
+	cursor: pointer;
+}
+.button:hover {
+	opacity:.5;
+}
+.ImgBtn {
+	height: 75px;
+	cursor: pointer;
+}
+.ImgBtn:hover {
+	opacity:.5;
+}
+.close {
+	 border:0px white solid;
+	 width:15px;
+}
+
+.MenuDivs {
+	font-family:arial;
+    position: absolute;
+    margin: 10px;
+    padding: 10px;
+    top: 5%;
+    left: 5%;
+    background-color: #f7f9fc;
+    border: 2px solid #000c2b;
+    border-radius: 7px;
+    display: none;
+    overflow-y: scroll;
+}
+
+.menu {
+	font-family:arial;
+    display: inline-block;
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 7px;
+    font-weight: bold;
+}
+
+.tools {
+    cursor: pointer;
+    vertical-align: middle;
+}
+.tools:hover {
+    opacity: .67;
+}
+
