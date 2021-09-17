@@ -81,7 +81,7 @@
 }
 .button {
 	color: #0F1C46;
-	font-size: 24px;
+	font-size: 18px;
 	font-weight: bold;
 	border:1px #0F1C46 solid;
 	border-radius: 3px;
@@ -106,3 +106,35 @@
 	 border:0px white solid;
 	 width:15px;
 }
+
+.MenuDivs {
+	font-family:arial;
+    position: absolute;
+    margin: 10px;
+    padding: 10px;
+    top: 5%;
+    left: 5%;
+    background-color: #f7f9fc;
+    border: 2px solid #000c2b;
+    border-radius: 7px;
+    display: none;
+    overflow-y: scroll;
+}
+
+.menu {
+	font-family:arial;
+    display: inline-block;
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 7px;
+    font-weight: bold;
+}
+
+.tools {
+    cursor: pointer;
+    vertical-align: middle;
+}
+.tools:hover {
+    opacity: .67;
+}
+
