@@ -1,6 +1,6 @@
 <?php
 
-	 ini_set('display_errors', 1);
+	ini_set('display_errors', 1);
         ini_set('display_startup_errors', 1);
         error_reporting(E_ALL);
 
@@ -114,7 +114,7 @@
 			case 'Houston Texans': $code = 'HOU'; break;
 			case 'Dallas Cowboys': $code = 'DAL'; break;
 			case 'Minnesota Vikings': $code = 'MIN'; break;
-			case 'Las Vegas Raiders': $code = 'LVG'; break;
+			case 'Las Vegas Raiders': $code = 'LVR'; break;
 			case 'Jacksonville Jaguars': $code = 'JAX'; break;
 			case 'Detroit Lions': $code = 'DET'; break;
 		}
@@ -123,13 +123,13 @@
 
 	function Get_NFL_Stats() 
 	{
-		$offense = getData("https://www.pro-football-reference.com/years/2020/", "Tot Yds &amp; TO", "League Total");
-		$defense = getData("https://www.pro-football-reference.com/years/2020/opp.htm", "Team Defense", "Team Advanced Defense");
+		$offense = getData("https://www.pro-football-reference.com/years/" . date('Y') . "/", "Tot Yds &amp; TO", "League Total");
+		$defense = getData("https://www.pro-football-reference.com/years/" . date('Y') . "/opp.htm", "Team Defense", "Team Advanced Defense");
 		$teams = [];
 
 		for ($i=0; $i<count($offense); $i++)
         	{
-			$team = new NFL_TeamData("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+			$team = new NFL_TeamData("", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 			$team->team = getTeamCode($offense[$i][1]);
 			$team->G = $offense[$i][2];
 
@@ -222,7 +222,7 @@
 			inner join (select league, code from teams) HomeTeam 
 				on HomeTeam.code = g.HomeTeam
 		where g.league = 'NFL' and AwayTeam.league = 'NFL' and HomeTeam.league = 'NFL'
-			and w.week = ".$_GET["week"].";  ";
+			and w.week = curdate();";
 	$results = $conn->query($sql);
 
 	$update_multi_sql = "";
@@ -267,17 +267,17 @@
 					else
 						$homeScore += rand(1,3);
 				}
-				$sql = " update games set AwayScore = " . $awayScore . ", HomeScore = " . $homeScore;
+				$sql = " update games set AwayScorePick = " . $awayScore . ", HomeScorePick = " . $homeScore;
 				$sql.= " where id = ".$row['id'];
-				$sql.= " and AwayScore is null and HomeScore is null ;  ";
+				// this is to avoid an accidental overwriting of existing data
+				$sql.= " and AwayScorePick is null and HomeScorePick is null ;  ";
 				$update_multi_sql .= $sql;
 				break;
 			}
 		}
 	}
 	$conn->multi_query($update_multi_sql);
-	echo "These NFL games have been updated:</br>";
-	echo str_replace(';', ';</br>', $update_multi_sql);
 	$conn->close();
+	echo $update_multi_sql;
 ?>
 
