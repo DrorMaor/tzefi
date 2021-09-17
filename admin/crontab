@@ -1,0 +1,11 @@
+# we do everything in NY Eastern Time, and this server is 5 hours ahead
+
+# generate the picks at midnight
+2 5 * * * curl -k https://www.tzefi.com/admin/NHL.php
+3 5 * * * curl -k https://www.tzefi.com/admin/NBA.php
+4 5 * * * python3 py/MLB.py
+5 5 * * * curl -k https://www.tzefi.com/admin/MLB.php
+
+# backup the database every day
+5 5 * * * /usr/bin/mysqldump -uroot tzefi > /var/www/html/admin/MySQL.sql
+
