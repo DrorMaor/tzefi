@@ -399,18 +399,19 @@ function Get_MLB_Picks($conn)
 					}
 			}
 		}
-		$sql = " update games set AwayScore = " . $awayScore . ", HomeScore = " . $homeScore;
+		$sql = " update games set AwayScorePick = " . $awayScore . ", HomeScorePick = " . $homeScore;
 		$sql.= " where id = " . $row["id"] ;
-		$sql.= " and AwayScore is null and HomeScore is null ;  ";
-echo $sql. "<br>";
+		$sql.= " and AwayScorePick is null and HomeScorePick is null ;  ";
 		$update_multi_sql .= $sql;
 	}
 	$conn->multi_query($update_multi_sql);
+	/*
 	if (isset($_POST['submitMLBpicks']))
 	{
-			echo "These have been updated:</br>";
-			echo str_replace(';', ';</br>', $update_multi_sql);
+		echo "These have been updated:</br>";
+		echo str_replace(';', ';</br>', $update_multi_sql);
 	}
+	*/
 	$conn->close();
 }
 ?>
