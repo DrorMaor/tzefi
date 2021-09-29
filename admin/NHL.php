@@ -15,14 +15,14 @@
 
 		function __construct ($team, $GP, $W, $L, $OL, $P, $G, $GA)
 		{
-			$this->team = $team;
-			$this->GP = $GP;
-			$this->W = $W;
-			$this->L = $L;
-			$this->OL = $OL;
-			$this->P = $P;
-			$this->G = $G;
-			$this->GA = $GA;
+			$this->team = $team;	// (3 letter team code)
+			$this->GP = $GP;	// games played
+			$this->W = $W;		// wins
+			$this->L = $L;		// losses
+			$this->OL = $OL;	// overtime losses
+			$this->P = $P;		// points
+			$this->G = $G;		// goals (scored)
+			$this->GA = $GA;	// goals against
 		}
 	}
 
@@ -43,66 +43,53 @@
 		if (strlen(trim($team->team)) == 3)
 		{
 			$goals = ceil($team->G / $team->GP);
-			$goals += rand(ceil(-$goals *.75), ceil($goals *.5) );
+			$goals += rand(ceil(-$goals * 0.75), ceil($goals * 0.5) );
 			return $goals;
 		}
+	}
+
+	function getData($url, $startText, $endText)
+	{
+		$html = file_get_contents($url);
+		$start = strpos($html, $startText);
+		$end = strpos($html, $endText);
+		$all = substr($html, $start, $end);
+		preg_match_all("/<tr>(.*)<\\/tr>/", $all, $match);
+		$DOM = new DOMDocument();
+		$DOM->loadHTML($all);
+		$rows = $DOM->getElementsByTagName('tr');
+		$cells = array();
+		foreach ($rows as $node)
+			$cells[] = tdRows($node->childNodes);
+		return $cells;
+	}
+
+	function tdRows($elements)
+	{
+		$cells = array();
+		foreach ($elements as $element)
+			$cells[] = $element->nodeValue;
+		return $cells;
 	}
 
 	function Get_NHL_Picks($conn)
 	{
 		$GameDate = date("Y-m-d");
-		if (isset($_POST['submitNHLpicks']))
-			$GameDate = $_POST["PickDate"];
-
 		// get stats of all teams
-		$fullData = shell_exec("python py/NHL.py");
-		$fullData = str_replace("{", "", $fullData);
-		$teams = [];
-		$stats = explode("}", $fullData);
-		foreach ($stats as $stat)
+		$url = "https://www.hockey-reference.com/leagues/NHL_2021.html";
+		$fullData = getData($url, "Team Statistics", "Team Analytics");
+
+		// [0] => Carolina Hurricanes* [1] => 56 [2] => 36 [3] => 12 [4] => 8 [5] => 80 [6] => .714 [7] => 179 [8] => 136 [9] => 0.67 [10] => -0.10 [11] => .625 [12] => 27 [13] => 27-12-17 [14] => .634 ) 
+		$codes = array("Anaheim Ducks" => "ANA", "Arizona Coyotes" => "ARI", "Boston Bruins" => "BOS", "Buffalo Sabres" => "BUF", "Calgary Flames" => "CGY", "Carolina Hurricanes" => "CAR", "Chicago Blackhawks" => "CHI", "Colorado Avalanche" => "COL", "Columbus Blue Jackets" => "CBJ", "Dallas Stars" => "DAL", "Detroit Red Wings" => "DET", "Edmonton Oilers" => "EDM", "Florida Panthers" => "FLA", "Los Angeles Kings" => "LAK", "Minnesota Wild" => "MIN", "Montreal Canadiens" => "MTL", "Nashville Predators" => "NSH", "New Jersey Devils" => "NJD", "New York Islanders" => "NYI", "New York Rangers" => "NYR", "Ottawa Senators" => "OTT", "Philadelphia Flyers" => "PHI", "Pittsburgh Penguins" => "PIT", "San Jose Sharks" => "SJS", "St. Louis Blues" => "STL", "Seattle Kraken" => "SEA", "Tampa Bay Lightning" => "TBL", "Toronto Maple Leafs" => "TOR", "Vancouver Canucks" => "VAN", "Vegas Golden Knights" => "VEG", "Washington Capitals" => "WSH", "Winnipeg Jets" => "WPG");
+		$teams = array();
+		foreach ($fullData as $team)
 		{
-			$statsExplode = explode(", ", $stat);
-			if (sizeof($statsExplode) == 8)
-			{
-				$team = new NHL_TeamData("", "", "", "", "", "", "", "");
-				foreach ($statsExplode as $statsEach)
-				{
-					$statsEachSplit = explode(":", $statsEach);
-					$key = trim(str_replace("'", "", $statsEachSplit[0]));
-					$val = trim(str_replace("'", "", $statsEachSplit[1]));
-					switch ($key)
-					{
-						case "team":
-							$team->team = $val;
-							break;
-						case "GP":
-							$team->GP = $val;
-							break;
-						case "W":
-							$team->W = $val;
-							break;
-						case "L":
-							$team->L = $val;
-							break;
-						case "OL":
-							$team->OL = $val;
-							break;
-						case "P":
-							$team->P = $val;
-							break;
-						case "G":
-							$team->G = $val;
-							break;
-						case "GA":
-							$team->GA = $val;
-							break;
-					}
-				}
-				array_push ($teams, $team);
-			}
+			$fullTeamName = str_replace("*", "", $team[0]);
+			if (array_key_exists($fullTeamName, $codes))
+				array_push ($teams, new NHL_TeamData($codes[$fullTeamName], $team[1], $team[2], $team[3], $team[4], $team[5], $team[7], $team[8]) );
 		}
 
-		// get this week's games
+		// get today's games
 		$sql = "select * from games where GameDate = '" . $GameDate . "' and league = 'NHL'; ";
 		$results = $conn->query($sql) or die($conn->error);
 		$update_multi_sql = "";
@@ -149,11 +136,7 @@
 		}
 
 		$result = $conn->multi_query($update_multi_sql);
-		if (isset($_POST['submitNHLpicks']))
-		{
-			echo "These NHL games have been updated:</br>";
-			echo str_replace(';', ';</br>', $update_multi_sql);
-		}
+		echo str_replace(';', ';</br>', $update_multi_sql);
 	}
 	$conn->close();
 ?>

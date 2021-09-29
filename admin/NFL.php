@@ -186,25 +186,16 @@
 	function Get_NFL_Score ($team, $grade)
 	{
 		$score = $team->o_P / $team->G;
-		if ($grade >=0)
-			$score = (rand(85, 125) / 100) * $score;
+		if ($grade >= 0)
+			$score = (rand(90, 120) / 100) * $score;
 		else
-			$score = (rand(65, 105) / 100) * $score;
+			$score = (rand(80, 110) / 100) * $score;
 		$score = ceil($score);
 		// take care of "unusual/irregular" scores
-		if ($score >=50)
+		if ($score >= 50)
 			$score = 49;
-		switch ($score)
-		{
-			case 1:
-			case 2:
-				$score = 0;
-				break;
-			case 4:
-			case 5:
-				$score = 3;
-				break;
-		}
+		if ($score <= 5)
+			$score = 3;
 		return $score;
 	}
 
@@ -222,7 +213,7 @@
 			inner join (select league, code from teams) HomeTeam 
 				on HomeTeam.code = g.HomeTeam
 		where g.league = 'NFL' and AwayTeam.league = 'NFL' and HomeTeam.league = 'NFL'
-			and w.week = curdate();";
+			and w.StartDate = curdate(); ";
 	$results = $conn->query($sql);
 
 	$update_multi_sql = "";
